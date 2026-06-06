@@ -6,6 +6,13 @@ use mlua::{Function, Lua, Result as LuaResult, Table};
 use std::{fs, path::Path};
 
 pub fn save_text<P: AsRef<Path>>(filename: P, content: &str) -> std::io::Result<()> {
+    let name_str = filename.as_ref().to_string_lossy();
+    if name_str.contains("..") || name_str.contains('/') || name_str.contains('\\') {
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::InvalidInput,
+            "Invalid filename: directory traversal detected",
+        ));
+    }
     let _ = ensure_dir_exists("/data/adb/config");
     let path = format!("/data/adb/config/{}", filename.as_ref().display());
     fs::write(&path, content)?;
@@ -13,6 +20,13 @@ pub fn save_text<P: AsRef<Path>>(filename: P, content: &str) -> std::io::Result<
 }
 
 pub fn load_text<P: AsRef<Path>>(filename: P) -> std::io::Result<String> {
+    let name_str = filename.as_ref().to_string_lossy();
+    if name_str.contains("..") || name_str.contains('/') || name_str.contains('\\') {
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::InvalidInput,
+            "Invalid filename: directory traversal detected",
+        ));
+    }
     let _ = ensure_dir_exists("/data/adb/config");
     let path = format!("/data/adb/config/{}", filename.as_ref().display());
     fs::read_to_string(path)

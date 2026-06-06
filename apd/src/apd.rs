@@ -2,7 +2,7 @@
 use std::os::unix::process::CommandExt;
 use std::{env, ffi::CStr, path::PathBuf, process::Command};
 
-use anyhow::{Ok, Result};
+use anyhow::Result;
 #[cfg(unix)]
 use getopts::Options;
 use rustix::thread::{Gid, Uid, set_thread_res_gid, set_thread_res_uid};
@@ -139,16 +139,20 @@ pub fn root_shell() -> Result<()> {
     let gid = unsafe { libc::getgid() };
     if free_idx < matches.free.len() {
         let name = &matches.free[free_idx];
-        uid = unsafe {
-            #[cfg(target_arch = "aarch64")]
-            let pw = libc::getpwnam(name.as_ptr()).as_ref();
-            #[cfg(target_arch = "x86_64")]
-            let pw = libc::getpwnam(name.as_ptr() as *const i8).as_ref();
+        if let Ok(name_c) = std::ffi::CString::new(name.as_str()) {
+            uid = unsafe {
+                #[cfg(target_arch = "aarch64")]
+                let pw = libc::getpwnam(name_c.as_ptr()).as_ref();
+                #[cfg(target_arch = "x86_64")]
+                let pw = libc::getpwnam(name_c.as_ptr() as *const i8).as_ref();
 
-            match pw {
-                Some(pw) => pw.pw_uid,
-                None => name.parse::<u32>().unwrap_or(0),
+                match pw {
+                    Some(pw) => pw.pw_uid,
+                    None => name.parse::<u32>().unwrap_or(0),
+                }
             }
+        } else {
+            uid = name.parse::<u32>().unwrap_or(0);
         }
     }
 

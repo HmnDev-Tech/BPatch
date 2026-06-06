@@ -140,7 +140,7 @@ android {
 
     externalNativeBuild {
         cmake {
-            version = "3.28.0+"
+            version = "3.22.1"
             path("src/main/cpp/CMakeLists.txt")
         }
     }
@@ -339,4 +339,8 @@ dependencies {
     implementation(libs.ini4j)
 
     compileOnly(libs.cxx)
+}
+
+tasks.withType<JavaCompile>().configureEach {
+    options.encoding = "windows-1251"
 }

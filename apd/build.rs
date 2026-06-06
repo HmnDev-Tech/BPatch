@@ -34,21 +34,9 @@ fn get_git_version() -> Result<(u32, String), std::io::Error> {
 }
 
 fn main() {
-    // update VersionCode when git repository change
-    println!("cargo:rerun-if-changed=../.git/HEAD");
-    println!("cargo:rerun-if-changed=../.git/refs/");
-
-    let (code, name) = match get_git_version() {
-        Ok((code, name)) => (code, name),
-        Err(_) => {
-            // show warning if git is not installed
-            println!("cargo:warning=Failed to get git version, using 0.0.0");
-            (0, "0.0.0".to_string())
-        }
-    };
+    let code = 1;
+    let name = "1.0.0";
     let out_dir = env::var("OUT_DIR").expect("Failed to get $OUT_DIR");
-    println!("out_dir: ${out_dir}");
-    println!("code: ${code}");
     let out_dir = Path::new(&out_dir);
     File::create(Path::new(out_dir).join("VERSION_CODE"))
         .expect("Failed to create VERSION_CODE")

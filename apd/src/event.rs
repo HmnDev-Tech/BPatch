@@ -247,7 +247,7 @@ pub fn on_services(superkey: Option<String>) -> Result<()> {
     Ok(())
 }
 
-fn run_uid_monitor() {
+fn run_uid_monitor(superkey: Option<String>) {
     info!("Trigger run_uid_monitor!");
 
     let mut command = &mut Command::new("/data/adb/apd");
@@ -261,6 +261,9 @@ fn run_uid_monitor() {
             })
         };
     }
+    if let Some(ref skey) = superkey {
+        command = command.arg("-s").arg(skey);
+    }
     command = command.arg("uid-listener");
 
     command
@@ -272,13 +275,13 @@ fn run_uid_monitor() {
 pub fn on_boot_completed(superkey: Option<String>) -> Result<()> {
     info!("on_boot_completed triggered!");
 
-    run_stage("boot-completed", superkey, false);
+    run_stage("boot-completed", superkey.clone(), false);
 
-    run_uid_monitor();
+    run_uid_monitor(superkey);
     Ok(())
 }
 
-pub fn start_uid_listener() -> Result<()> {
+pub fn start_uid_listener(superkey: Option<String>) -> Result<()> {
     info!("start_uid_listener triggered!");
     println!("[start_uid_listener] Registering...");
 
@@ -291,15 +294,19 @@ pub fn start_uid_listener() -> Result<()> {
     let tx_clone = tx.clone();
     let mutex = Arc::new(Mutex::new(()));
 
+    let superkey_for_signals = superkey.clone();
     {
         let mutex_clone = mutex.clone();
         thread::spawn(move || {
             let mut signals = Signals::new(&[SIGTERM, SIGINT, SIGPWR]).unwrap();
             for sig in signals.forever() {
                 log::warn!("[shutdown] Caught signal {sig}, refreshing package list...");
-                let skey = CStr::from_bytes_with_nul(b"su\0")
-                    .expect("[shutdown_listener] CStr::from_bytes_with_nul failed");
-                refresh_ap_package_list(&skey, &mutex_clone);
+                let superkey_cstr = superkey_for_signals
+                    .as_ref()
+                    .and_then(|s| std::ffi::CString::new(s.as_str()).ok());
+                let default_skey = CStr::from_bytes_with_nul(b"su\0").unwrap();
+                let skey = superkey_cstr.as_deref().unwrap_or(default_skey);
+                refresh_ap_package_list(skey, &mutex_clone);
                 break;
             }
         });
@@ -325,14 +332,18 @@ pub fn start_uid_listener() -> Result<()> {
 
     watcher.watch(dir.as_ref(), RecursiveMode::NonRecursive)?;
 
+    let superkey_for_loop = superkey.clone();
     let mut debounce = false;
     while let Ok(delayed) = rx.recv() {
         if delayed {
             debounce = false;
-            let skey = CStr::from_bytes_with_nul(b"su\0")
-                .expect("[start_uid_listener] CStr::from_bytes_with_nul failed");
-            refresh_ap_package_list(&skey, &mutex);
-            report_kernel(None, "uid_listener", "package-list-updated").unwrap_or_else(|e| {
+            let superkey_cstr = superkey_for_loop
+                .as_ref()
+                .and_then(|s| std::ffi::CString::new(s.as_str()).ok());
+            let default_skey = CStr::from_bytes_with_nul(b"su\0").unwrap();
+            let skey = superkey_cstr.as_deref().unwrap_or(default_skey);
+            refresh_ap_package_list(skey, &mutex);
+            report_kernel(superkey_for_loop.clone(), "uid_listener", "package-list-updated").unwrap_or_else(|e| {
                 warn!("Failed to report kernel about package list update: {e}");
             });
         } else if !debounce {

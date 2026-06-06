@@ -13,3 +13,5 @@ key.jks.base64.txt
 app/src/main/resources/
 private
 .claude
+.cargo/
+.rustup/

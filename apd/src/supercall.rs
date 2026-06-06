@@ -12,7 +12,7 @@ use log::{error, info, warn};
 use crate::package::{read_ap_package_config, synchronize_package_uid};
 
 const MAJOR: c_long = 0;
-const MINOR: c_long = 11;
+const MINOR: c_long = 13;
 const PATCH: c_long = 1;
 
 const KSTORAGE_EXCLUDE_LIST_GROUP: i32 = 1;
@@ -263,7 +263,7 @@ pub fn privilege_apd_profile(superkey: &Option<String>) {
 
     let all_allow_ctx = "u:r:magisk:s0";
     let profile = SuProfile {
-        uid: process::id().try_into().expect("PID conversion failed"),
+        uid: unsafe { libc::getuid() } as i32,
         to_uid: 0,
         scontext: convert_string_to_u8_array(all_allow_ctx),
     };

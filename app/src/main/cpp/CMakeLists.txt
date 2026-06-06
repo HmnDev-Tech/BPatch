@@ -1,5 +1,8 @@
-cmake_minimum_required(VERSION 3.28.0)
+cmake_minimum_required(VERSION 3.22.1)
 project("apjni")
+
+set(CMAKE_CXX_LINK_OPTIONS_IPO "-fuse-ld=lld")
+set(CMAKE_C_LINK_OPTIONS_IPO "-fuse-ld=lld")
 
 find_program(CCACHE ccache)
 
@@ -9,6 +12,13 @@ if (CCACHE)
 endif ()
 
 find_package(cxx REQUIRED CONFIG)
+
+get_target_property(cxx_link_opts cxx::cxx INTERFACE_LINK_OPTIONS)
+if (cxx_link_opts)
+    list(REMOVE_ITEM cxx_link_opts "-fuse-ld=gold")
+    set_target_properties(cxx::cxx PROPERTIES INTERFACE_LINK_OPTIONS "${cxx_link_opts}")
+endif ()
+
 link_libraries(cxx::cxx)
 
 macro(SET_OPTION option value)
@@ -26,4 +36,4 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 
 target_link_libraries(${PROJECT_NAME} PRIVATE log)
 target_compile_options(${PROJECT_NAME} PRIVATE -flto)
-target_link_options(${PROJECT_NAME} PRIVATE "-Wl,--build-id=none" "-Wl,-icf=all,--lto-O3" "-Wl,-s,-x,--gc-sections" "-Wl,--no-undefined")
+target_link_options(${PROJECT_NAME} PRIVATE "-fuse-ld=lld" "-Wl,--build-id=none" "-Wl,-icf=all,--lto-O3" "-Wl,-s,-x,--gc-sections" "-Wl,--no-undefined")

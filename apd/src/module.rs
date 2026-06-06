@@ -393,6 +393,12 @@ fn _install_module(zip: &str) -> Result<()> {
     };
     let module_id = module_id.trim();
 
+    // Validate module_id to prevent path traversal
+    let id_re = regex_lite::Regex::new(r"^[a-zA-Z0-9._-]+$")?;
+    if !id_re.is_match(module_id) || module_id.contains("..") || module_id.contains('/') || module_id.contains('\\') {
+        bail!("Invalid module ID: '{}'", module_id);
+    }
+
     // Check if this module is a metamodule
     let is_metamodule = metamodule::is_metamodule(&module_prop);
 
@@ -506,6 +512,11 @@ pub fn _uninstall_module(id: &str, update_dir: &str) -> Result<()> {
     let dir = Path::new(update_dir);
     ensure!(dir.exists(), "No module installed");
 
+    let id_re = regex_lite::Regex::new(r"^[a-zA-Z0-9._-]+$")?;
+    if !id_re.is_match(id) || id.contains("..") || id.contains('/') || id.contains('\\') {
+        bail!("Invalid module ID: '{}'", id);
+    }
+
     // iterate the modules_update dir, find the module to be removed
     let dir = fs::read_dir(dir)?;
     for entry in dir.flatten() {
@@ -552,6 +563,11 @@ pub fn uninstall_module(id: &str) -> Result<()> {
 pub fn _undo_uninstall_module(id: &str, update_dir: &str) -> Result<()> {
     let dir = Path::new(update_dir);
     ensure!(dir.exists(), "No module installed");
+
+    let id_re = regex_lite::Regex::new(r"^[a-zA-Z0-9._-]+$")?;
+    if !id_re.is_match(id) || id.contains("..") || id.contains('/') || id.contains('\\') {
+        bail!("Invalid module ID: '{}'", id);
+    }
 
     let mut found = false;
     for entry in fs::read_dir(dir)?.flatten() {
