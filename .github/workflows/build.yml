@@ -1,0 +1,171 @@
+name: Build Manager
+
+on:
+  push:
+    tags: [ "*" ]
+    branches: [ "main" ]
+    paths:
+      - '.github/workflows/build.yml'
+      - 'app/**'
+      - 'apd/**'
+      - 'build.gradle.kts'
+      - 'gradle/libs.versions.toml'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - '.github/workflows/build.yml'
+      - 'app/**'
+      - 'apd/**'
+      - 'build.gradle.kts'
+      - 'gradle/libs.versions.toml'
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  build-manager:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Generate version
+        id: parse_version
+        run: |
+          COMMIT_NUM=$(git rev-list --count HEAD)
+          VERSION=$(echo "$COMMIT_NUM + 200 + 10000" | bc)
+          echo "Generated Version: $VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: jetbrains
+          java-version: 21
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: ''
+
+      - name: Install toolchain
+        run: |
+          rustup default stable
+          rustup update stable
+          cargo install cargo-ndk
+          rustup target install aarch64-linux-android
+
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apd
+          cache-targets: false
+
+      - name: Build with Gradle
+        run: |
+          echo 'org.gradle.parallel=true' >> gradle.properties
+          echo 'org.gradle.vfs.watch=true' >> gradle.properties
+          echo 'org.gradle.jvmargs=-Xmx2048m' >> gradle.properties
+          echo 'android.native.buildOutput=verbose' >> gradle.properties
+          sed -i 's/org.gradle.configuration-cache=true//g' gradle.properties
+          ./gradlew clean assembleDebug assembleRelease
+          echo "BUILD_TOOL_VERSION=$(ls /usr/local/lib/android/sdk/build-tools/ | tail -n 1)" >> $GITHUB_ENV
+
+      - name: Sign Release
+        env:
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          BUILD_TOOLS_VERSION: ${{ env.BUILD_TOOL_VERSION }}
+        if: ${{ env.SIGNING_KEY != '' }}
+        continue-on-error: true
+        uses: kevin-david/zipalign-sign-android-release@v2
+        id: sign_app
+        with:
+          releaseDirectory: app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ secrets.ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+          zipAlign: true
+
+      - name: Sign Debug APK
+        env:
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          BUILD_TOOLS_VERSION: ${{ env.BUILD_TOOL_VERSION }}
+        if: ${{ env.SIGNING_KEY != '' }}
+        continue-on-error: true
+        uses: kevin-david/zipalign-sign-android-release@v2
+        id: sign_debug_app
+        with:
+          releaseDirectory: app/build/outputs/apk/debug
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ secrets.ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+          zipAlign: true
+
+      - name: Upload mappings
+        uses: actions/upload-artifact@v6
+        with:
+          name: "mappings"
+          path: "app/build/outputs/mapping/release/"
+
+      - name: Upload build artifact1
+        env:
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+        if: ${{ env.SIGNING_KEY != '' }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: APatch-Release
+          path: |
+            ${{ steps.sign_app.outputs.signedReleaseFile }}
+
+      - name: Upload build artifact2
+        env:
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+        if: ${{ env.SIGNING_KEY != '' }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: APatch-Debug
+          path: |
+            ${{ steps.sign_debug_app.outputs.signedReleaseFile }}
+
+      - name: Post to channel
+        if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && github.ref_type != 'tag' }}
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          COMMIT_URL: ${{ github.event.head_commit.url }}
+          COMMIT_ID: ${{ github.event.head_commit.id }}
+        run: |
+          if [ -n "${BOT_TOKEN}" ]; then
+            CHANNELS=(-1002058433411 -1001910818234 -1002312454396)
+            RELEASE_APK="${{ steps.sign_app.outputs.signedReleaseFile }}"
+            DEBUG_APK="${{ steps.sign_debug_app.outputs.signedReleaseFile }}"
+          
+            for CHANNEL in "${CHANNELS[@]}"; do
+              URL=$(python3 .github/scripts/telegram_url.py $CHANNEL)
+              if [ -f "$RELEASE_APK" ] && [ -f "$DEBUG_APK" ]; then
+                curl -v "$URL" -F "Release1=@$RELEASE_APK" -F "Release2=@$DEBUG_APK"
+              fi
+            done
+          fi
+
+      - name: Release apk
+        env:
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+        if: ${{ env.SIGNING_KEY != '' && github.ref_type == 'tag' }}
+        continue-on-error: true
+        uses: ncipollo/release-action@v1
+        with:
+          token: ${{ github.token }}
+          tag: ${{ steps.parse_version.outputs.VERSION }}
+          artifacts: ${{steps.sign_app.outputs.signedReleaseFile}}
+          generateReleaseNotes: true
+          makeLatest: true
+          replacesArtifacts: true
