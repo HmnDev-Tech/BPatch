@@ -1,5 +1,4 @@
 <div align="center">
-<img src="app/src/main/ic_launcher-playstore.png" style="width: 128px;" alt="logo">
 
 <h1 align="center">BPatch</h1>
 
