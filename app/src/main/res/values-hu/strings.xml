@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">APatch</string>
+    <string name="app_name" translatable="false">BPatch</string>
     <string name="kpatch_version">Verzió: %s</string>
     <string name="home_apatch_version">APatch: %s</string>
     <string name="reboot">Újraindítás</string>

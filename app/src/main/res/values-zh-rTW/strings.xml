@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">APatch</string>
+    <string name="app_name" translatable="false">BPatch</string>
     <string name="android_patch">Android 修補</string>
     <string name="patch_warnning">安裝過程存在風險。請確保你的資料已備份。</string>
     <string name="reboot_download">重新啟動至 Download</string>

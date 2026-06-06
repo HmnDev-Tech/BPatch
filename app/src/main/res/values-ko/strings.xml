@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">APatch</string>
+    <string name="app_name" translatable="false">BPatch</string>
     <string name="home">홈</string>
     <string name="patch_warnning">설치에는 위험이 따릅니다. 데이터가 백업되었는지 확인하세요.</string>
     <string name="patch">패치</string>

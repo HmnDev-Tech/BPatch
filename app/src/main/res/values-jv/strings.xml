@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">APatch</string>
+    <string name="app_name" translatable="false">BPatch</string>
     <string name="android_patch">AndroidPatch</string>
     <string name="reboot">Reboot</string>
     <string name="settings">Aturan</string>

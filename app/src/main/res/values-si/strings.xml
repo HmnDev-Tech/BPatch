@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">APatch</string>
+    <string name="app_name" translatable="false">BPatch</string>
     <string name="home">මුල් පිටුව</string>
     <string name="reboot">Restart කරන්න</string>
     <string name="about">APatch පිළිබඳ</string>

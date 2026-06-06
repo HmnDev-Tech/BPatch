@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">APatch</string>
+    <string name="app_name" translatable="false">BPatch</string>
     <string name="home">হোম</string>
     <string name="kernel_patch">কার্নেলপ্যাচ</string>
     <string name="android_patch">অ্যান্ড্রয়েডপ্যাচ</string>

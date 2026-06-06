@@ -85,7 +85,7 @@
     <string name="home_su_path">Eseguibile su</string>
     <string name="apm">APModule</string>
     <string name="super_key">Superchiave</string>
-    <string name="app_name" translatable="false">APatch</string>
+    <string name="app_name" translatable="false">BPatch</string>
     <string name="kpm">KPModule</string>
     <string name="clear_super_key">Elimina Superchiave</string>
     <string name="apm_not_installed">AndroidPatch non installato</string>

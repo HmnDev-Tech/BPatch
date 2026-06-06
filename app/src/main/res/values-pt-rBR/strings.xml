@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">APatch</string>
+    <string name="app_name" translatable="false">BPatch</string>
     <string name="home">Início</string>
     <string name="patch_warnning">A instalação apresenta riscos. Por favor, certifique-se de fazer backup de seus dados.</string>
     <string name="patch_title">Patch</string>

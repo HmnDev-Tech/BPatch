@@ -2,7 +2,7 @@
 <resources>
     <string name="apm">系统模块</string>
     <string name="super_key">超级密钥</string>
-    <string name="app_name" translatable="false">APatch</string>
+    <string name="app_name" translatable="false">BPatch</string>
     <string name="kpm">内核模块</string>
     <string name="android_patch">系统补丁</string>
     <string name="save_log">保存日志</string>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">APatch</string>
+    <string name="app_name" translatable="false">BPatch</string>
     <string name="home_click_to_learn_apatch">Erfahre mehr über die Funktionen von APatch und wie man sie verwendet</string>
     <string name="about_source_code"><![CDATA[<p>Quellcode anzeigen unter %1$s<p/>Trete unserem %2$s Kanel bei<p/>Trete unserer %3$s Gruppe bei]]></string>
     <string name="home">Startseite</string>

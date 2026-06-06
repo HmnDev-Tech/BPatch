@@ -2,7 +2,7 @@
 <resources>
     <string name="apm">Moduły AP</string>
     <string name="super_key">SuperKey</string>
-    <string name="app_name" translatable="false">APatch</string>
+    <string name="app_name" translatable="false">BPatch</string>
     <string name="kpm">Moduły KP</string>
     <string name="home">Pulpit</string>
     <string name="send_log">Prześlij logi</string>

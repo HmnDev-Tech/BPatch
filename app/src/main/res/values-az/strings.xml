@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">APatch</string>
+    <string name="app_name" translatable="false">BPatch</string>
     <string name="home">Ana səhifə</string>
     <string name="patch_warnning">Quraşdırma risklərlə gəlir. Zəhmət olmasa, məlumatlarınızın yedəkləndiyindən əmin olun.</string>
     <string name="patch">Yamaq</string>

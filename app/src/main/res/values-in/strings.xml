@@ -5,7 +5,7 @@
     <string name="android_patch">AndroidPatch</string>
     <string name="apm">APModul</string>
     <string name="super_key">SuperKey</string>
-    <string name="app_name" translatable="false">APatch</string>
+    <string name="app_name" translatable="false">BPatch</string>
     <string name="kpm">KPModul</string>
     <string name="reboot_recovery">Reboot ke Recovery</string>
     <string name="reboot">Reboot</string>

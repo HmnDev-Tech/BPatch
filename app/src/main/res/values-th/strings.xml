@@ -31,7 +31,7 @@
     <string name="kpm_license">ใบอนุญาต</string>
     <string name="kpm_apm_empty">ไม่มีการโหลดโมดูล</string>
     <string name="apm">APModule</string>
-    <string name="app_name" translatable="false">APatch</string>
+    <string name="app_name" translatable="false">BPatch</string>
     <string name="kpm">KPModule</string>
     <string name="apm_reboot_to_apply">รีบูตเพื่อให้มีผล</string>
     <string name="apm_uninstall_success">กำลังดาวน์โหลดโมดูล: %s…</string>

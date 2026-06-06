@@ -2,7 +2,7 @@
 <resources>
     <string name="apm">APModule</string>
     <string name="super_key">Superclave</string>
-    <string name="app_name" translatable="false">APatch</string>
+    <string name="app_name" translatable="false">BPatch</string>
     <string name="patch_warnning">La instalación conlleva riesgos. Así que asegúrate de tener una copia de seguridad de tus datos.</string>
     <string name="home">Inicio</string>
     <string name="reboot_download">Reiniciar al modo «download»</string>
